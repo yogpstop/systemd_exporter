@@ -219,7 +219,7 @@ func ReadFileNoStat(filename string) ([]byte, error) {
 func NewCPUAcct(cgSubpath string, logger log.Logger) (*CPUAcct, error) {
 	var cpuUsage CPUAcct
 
-	cgPath, err := cgGetPath("cpu", cgSubpath, "cpuacct.usage_all", logger)
+	cgPath, err := cgGetPath("cpu", cgSubpath, "cpu.stat", logger)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to get cpu controller path")
 	}
@@ -234,39 +234,25 @@ func NewCPUAcct(cgSubpath string, logger log.Logger) (*CPUAcct, error) {
 	}
 
 	scanner := bufio.NewScanner(bytes.NewReader(b))
-	if ok := scanner.Scan(); !ok {
-		return nil, errors.Errorf("unable to scan file %s", cgPath)
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, errors.Wrapf(err, "unable to scan file %s", cgPath)
-	}
+	cpuUsage.CPUs = append(cpuUsage.CPUs, CPUUsage{})
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
 			return nil, errors.Wrapf(err, "unable to scan file %s", cgPath)
 		}
 		text := scanner.Text()
 		vals := strings.Split(text, " ")
-		if len(vals) != 3 {
+		if len(vals) != 2 {
 			return nil, errors.Errorf("unable to parse contents of file %s", cgPath)
 		}
-		cpu, err := strconv.ParseUint(vals[0], 10, 32)
-		if err != nil {
-			return nil, errors.Wrapf(err, "unable to parse %s as uint32 (from %s)", vals[0], cgPath)
-		}
 		user, err := strconv.ParseUint(vals[1], 10, 64)
-		if err != nil {
+		if err != nil && (vals[0] == "user_usec" || vals[0] == "system_usec") {
 			return nil, errors.Wrapf(err, "unable to parse %s as uint64 (from %s)", vals[1], cgPath)
 		}
-		sys, err := strconv.ParseUint(vals[2], 10, 64)
-		if err != nil {
-			return nil, errors.Wrapf(err, "unable to parse %s as an in (from %s)", vals[2], cgPath)
+		if vals[0] == "user_usec" {
+			cpuUsage.CPUs[0].UserNanosec = user
+		} else if vals[0] == "system_usec" {
+			cpuUsage.CPUs[0].SystemNanosec = user
 		}
-		onecpu := CPUUsage{
-			CPUId:         uint32(cpu),
-			UserNanosec:   user,
-			SystemNanosec: sys,
-		}
-		cpuUsage.CPUs = append(cpuUsage.CPUs, onecpu)
 	}
 	if len(cpuUsage.CPUs) < 1 {
 		return nil, errors.Errorf("no CPU/core info extracted from %s", cgPath)

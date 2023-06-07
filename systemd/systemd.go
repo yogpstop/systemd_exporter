@@ -547,7 +547,8 @@ func (c *Collector) collectUnitCPUUsageMetrics(unitType string, conn *dbus.Conn,
 		// Unexpected. Why is there no cgroup on an active unit?
 		subType := c.mustGetUnitStringTypeProperty(unitType, "Type", "unknown", conn, unit)
 		slice := c.mustGetUnitStringTypeProperty(unitType, "Slice", "unknown", conn, unit)
-		return errors.Errorf("got 'no cgroup' from systemd for active unit (state=%s subtype=%s slice=%s)", unit.ActiveState, subType, slice)
+		level.Debug(c.logger).Log("msg", "got 'no cgroup' from systemd for active unit (state=%s subtype=%s slice=%s)", unit.ActiveState, subType, slice)
+		return nil
 	case cgSubpath == "":
 		// We are likely reading a unit that is currently changing state, so
 		// we record this and bail
@@ -578,8 +579,8 @@ func (c *Collector) collectUnitCPUUsageMetrics(unitType string, conn *dbus.Conn,
 		return errors.Wrapf(err, errControlGroupReadMsg, "CPU usage")
 	}
 
-	userSeconds := float64(cpuUsage.UsageUserNanosecs()) / 1000000000.0
-	sysSeconds := float64(cpuUsage.UsageSystemNanosecs()) / 1000000000.0
+	userSeconds := float64(cpuUsage.UsageUserNanosecs()) / 1000000.0
+	sysSeconds := float64(cpuUsage.UsageSystemNanosecs()) / 1000000.0
 
 	ch <- prometheus.MustNewConstMetric(
 		c.unitCPUTotal, prometheus.CounterValue,
