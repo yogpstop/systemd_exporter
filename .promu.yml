@@ -3,7 +3,7 @@ go:
     # .circle/config.yml should also be updated.
     version: 1.20
 repository:
-    path: github.com/prometheus-community/systemd_exporter
+    path: github.com/yogpstop/systemd_exporter
 build:
     binaries:
         - name: systemd_exporter

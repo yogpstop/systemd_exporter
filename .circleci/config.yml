@@ -36,7 +36,7 @@ jobs:
 
     environment:
       DOCKER_TEST_IMAGE_NAME: quay.io/prometheus/golang-builder:1.18-base
-      REPO_PATH: github.com/prometheus-community/systemd_exporter
+      REPO_PATH: github.com/yogpstop/systemd_exporter
 
     steps:
       - checkout
@@ -79,8 +79,8 @@ workflows:
               only: /.*/
       - prometheus/publish_main:
           context: org-context
-          docker_hub_organization: prometheuscommunity
-          quay_io_organization: prometheuscommunity
+          docker_hub_organization: yogpstop
+          quay_io_organization: ''
           requires:
             - test
             - build
@@ -89,8 +89,8 @@ workflows:
               only: main
       - prometheus/publish_release:
           context: org-context
-          docker_hub_organization: prometheuscommunity
-          quay_io_organization: prometheuscommunity
+          docker_hub_organization: yogpstop
+          quay_io_organization: ''
           requires:
             - test
             - build

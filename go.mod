@@ -1,4 +1,4 @@
-module github.com/prometheus-community/systemd_exporter
+module github.com/yogpstop/systemd_exporter
 
 go 1.19
 
