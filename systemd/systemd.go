@@ -42,6 +42,7 @@ var (
 	systemdUser               = kingpin.Flag("systemd.collector.user", "Connect to the user systemd instance.").Bool()
 	enableRestartsMetrics     = kingpin.Flag("systemd.collector.enable-restart-count", "Enables service restart count metrics. This feature only works with systemd 235 and above.").Bool()
 	enableIPAccountingMetrics = kingpin.Flag("systemd.collector.enable-ip-accounting", "Enables service ip accounting metrics. This feature only works with systemd 235 and above.").Bool()
+	disableCgroupMetrics      = kingpin.Flag("systemd.collector.disable-cgroup-metrics", "Disables cgroup related metrics.").Bool()
 )
 
 var unitStatesName = []string{"active", "activating", "deactivating", "inactive", "failed"}
@@ -325,9 +326,11 @@ func (c *Collector) collectUnit(conn *dbus.Conn, ch chan<- prometheus.Metric, un
 			level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
 		}
 
-		err = c.collectUnitCPUUsageMetrics("Service", conn, ch, unit)
-		if err != nil {
-			level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+		if !*disableCgroupMetrics {
+			err = c.collectUnitCPUUsageMetrics("Service", conn, ch, unit)
+			if err != nil {
+				level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+			}
 		}
 
 		if *enableIPAccountingMetrics {
@@ -341,9 +344,11 @@ func (c *Collector) collectUnit(conn *dbus.Conn, ch chan<- prometheus.Metric, un
 		if err != nil {
 			level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
 		}
-		err = c.collectUnitCPUUsageMetrics("Mount", conn, ch, unit)
-		if err != nil {
-			level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+		if !*disableCgroupMetrics {
+			err = c.collectUnitCPUUsageMetrics("Mount", conn, ch, unit)
+			if err != nil {
+				level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+			}
 		}
 	case strings.HasSuffix(unit.Name, ".timer"):
 		err := c.collectTimerTriggerTime(conn, ch, unit)
@@ -357,19 +362,25 @@ func (c *Collector) collectUnit(conn *dbus.Conn, ch chan<- prometheus.Metric, un
 		}
 		// Most sockets do not have a cpu cgroupfs entry, but a
 		// few do, notably docker.socket
-		err = c.collectUnitCPUUsageMetrics("Socket", conn, ch, unit)
-		if err != nil {
-			level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+		if !*disableCgroupMetrics {
+			err = c.collectUnitCPUUsageMetrics("Socket", conn, ch, unit)
+			if err != nil {
+				level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+			}
 		}
 	case strings.HasSuffix(unit.Name, ".swap"):
-		err = c.collectUnitCPUUsageMetrics("Swap", conn, ch, unit)
-		if err != nil {
-			level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+		if !*disableCgroupMetrics {
+			err = c.collectUnitCPUUsageMetrics("Swap", conn, ch, unit)
+			if err != nil {
+				level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+			}
 		}
 	case strings.HasSuffix(unit.Name, ".slice"):
-		err = c.collectUnitCPUUsageMetrics("Slice", conn, ch, unit)
-		if err != nil {
-			level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+		if !*disableCgroupMetrics {
+			err = c.collectUnitCPUUsageMetrics("Slice", conn, ch, unit)
+			if err != nil {
+				level.Warn(logger).Log("msg", errUnitMetricsMsg, "err", err)
+			}
 		}
 	default:
 		level.Debug(c.logger).Log("msg", infoUnitNoHandler, unit.Name)
