@@ -1,5 +1,17 @@
 ## main / unreleased
 
+## 0.5.1-unofficial / 2023-06-09
+
+* New option `--collector.disable-cgroup-metrics`, which disables collecting cgroup related metrics
+* Use cpu controller instead of cpuacct controller for cgroup2 compatible
+
+And unreleased upstream changes
+
+* Remove broken metrics collection #68
+* Update common Prometheus files #62
+* Update to exporter-toolkit v0.8.1 #64
+* Add unit timestamp metrics #58
+
 ## 0.5.0 / 2022-07-20
 
 Now released under the Prometheus Community

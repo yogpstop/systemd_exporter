@@ -1,6 +1,6 @@
 # Systemd exporter
 
-[![CircleCI](https://circleci.com/gh/yogpstop/systemd_exporter/tree/master.svg?style=shield)](circleci)
+[![CircleCI](https://circleci.com/gh/yogpstop/systemd_exporter/tree/main.svg?style=shield)](https://circleci.com/gh/yogpstop/systemd_exporter/tree/main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yogpstop/systemd_exporter)](https://goreportcard.com/report/github.com/yogpstop/systemd_exporter)
 [![Docker Pulls](https://img.shields.io/docker/pulls/yogpstop/systemd-exporter.svg?maxAge=604800)](https://hub.docker.com/r/yogpstop/systemd-exporter)
 
